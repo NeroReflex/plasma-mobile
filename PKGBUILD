@@ -12,6 +12,7 @@ pkgname=(
   qqc2-breeze-style
   plasma-mobile
   plasma-mobile-sounds
+  plasma-mobile-nm
 )
 
 makedepends=(
@@ -22,7 +23,6 @@ makedepends=(
 )
 
 optdepends=(
-  'plasma-mobile-nm: Mobile networking settings modules for WiFi, etc.'
   'plasma-settings: Settings application for Plasma Mobile'
   'plasma-dialer: Phone application'
   'plasma-workspace-wallpapers: A large wallpaper selection for Plasma'
@@ -30,13 +30,15 @@ optdepends=(
 makedepends=(cmake extra-cmake-modules)
 source=(
     "https://download.kde.org/stable/plasma/$pkgver/plasma-mobile-$pkgver.tar.xz"
-    "https://invent.kde.org/plasma/qqc2-breeze-style/-/archive/0701295ed55e0e7d6dcecca138f67997ebf8c82a/qqc2-breeze-style-0701295ed55e0e7d6dcecca138f67997ebf8c82a.tar.bz2"
+    "https://download.kde.org/stable/plasma/5.27.10/qqc2-breeze-style-5.27.10.tar.xz"
     "https://download.kde.org/stable/plasma-mobile-sounds/0.1/plasma-mobile-sounds-0.1.tar.xz"
+    "https://download.kde.org/stable/plasma/$pkgver/plasma-nm-$pkgver.tar.xz"
 )
 sha256sums=(
     '2ca8ff8cd848b727e5513ac3edca8fa5ad3618845642eb3f72c5dd5441425b2e'
-    'SKIP'
+    '3d8a6fbe18f7ac56ff0c0706e9219df29d49ff398173522bd53f1d8baa7b8b3b' # qqc2-breeze-style-5.27.10.tar.xz
     'f1aed3ddd1de209e0d60df54e968b141b4c868ff0c4706dedb85e4cce29f26af' # plasma-mobile-sounds-0.1.tar.xz
+    'b75dd3a7624e137ce350f438c3e3535c24d015d0e096e8e2f513b75df1b3dcb0' # plasma-nm-5.27.10.tar.xz
 )
 
 prepare() {
@@ -44,19 +46,39 @@ prepare() {
 }
 
 build() {
-  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -B qqc2-breeze-style_build -S "qqc2-breeze-style-0701295ed55e0e7d6dcecca138f67997ebf8c82a"
-  cmake --build qqc2-breeze-style_build --config Release
+  cmake -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release \
+    -B qqc2-breeze-style_build \
+    -S "qqc2-breeze-style-${pkgver}"
 
-  cmake -B plasma-mobile_build -S "plasma-mobile-${pkgver}" \
+  cmake -B plasma-mobile_build \
+    -S "plasma-mobile-${pkgver}" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_INSTALL_LIBDIR=/usr/lib \
     -DCMAKE_INSTALL_LIBEXECDIR=lib \
     -DBUILD_TESTING=OFF
-  cmake --build plasma-mobile_build
 
-  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -B plasma-mobile-sounds_build -S "plasma-mobile-sounds-0.1"
+  cmake -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release \
+    -B plasma-mobile-sounds_build \
+    -S "plasma-mobile-sounds-0.1"
+
+  cmake -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_MOBILE=True \
+    -S "plasma-nm-$pkgver" \
+    -B plamsa-mobile-nm_build
+
+  cmake --build qqc2-breeze-style_build --config Release
+  cmake --build plasma-mobile_build
   cmake --build plasma-mobile-sounds_build --config Release
+  cmake --build plamsa-mobile-nm_build --config Release
+}
+
+package_plasma-mobile-nm() {
+  DESTDIR="$pkgdir" cmake --install plamsa-mobile-nm_build --config Release
 }
 
 package_plasma-mobile() {
@@ -74,7 +96,7 @@ package_plasma-mobile() {
     kpipewire
   )
 
-  DESTDIR="$pkgdir" cmake --install plasma-mobile_build
+  DESTDIR="$pkgdir" cmake --install plasma-mobile_build --config Release
 }
  
 
