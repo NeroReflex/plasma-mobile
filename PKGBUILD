@@ -1,7 +1,7 @@
 # Maintainer: Devin Lin <devin@kde.org>
 pkgbase=plasma-mobile
 pkgver=5.27.10
-pkgrel=2
+pkgrel=3
 pkgdesc="Plasma Mobile shell components."
 arch=(x86_64 i686 i486 pentium4 arm armv6h armv7h aarch64)
 url="https://invent.kde.org/plasma/plasma-mobile"
@@ -11,10 +11,12 @@ groups=()
 pkgname=(
   qqc2-breeze-style
   plasma-mobile
+  plasma-mobile-sounds
 )
 
 makedepends=(
     git
+    cmake
     extra-cmake-modules
     qt5-tools
 )
@@ -24,16 +26,17 @@ optdepends=(
   'plasma-settings: Settings application for Plasma Mobile'
   'plasma-dialer: Phone application'
   'plasma-workspace-wallpapers: A large wallpaper selection for Plasma'
-  'plasma-mobile-sounds: Plasma Mobile sound theme'
 )
 makedepends=(cmake extra-cmake-modules)
 source=(
     "https://download.kde.org/stable/plasma/$pkgver/plasma-mobile-$pkgver.tar.xz"
     "https://invent.kde.org/plasma/qqc2-breeze-style/-/archive/0701295ed55e0e7d6dcecca138f67997ebf8c82a/qqc2-breeze-style-0701295ed55e0e7d6dcecca138f67997ebf8c82a.tar.bz2"
+    "https://download.kde.org/stable/plasma-mobile-sounds/0.1/plasma-mobile-sounds-0.1.tar.xz"
 )
 sha256sums=(
     '2ca8ff8cd848b727e5513ac3edca8fa5ad3618845642eb3f72c5dd5441425b2e'
     'SKIP'
+    'f1aed3ddd1de209e0d60df54e968b141b4c868ff0c4706dedb85e4cce29f26af' # plasma-mobile-sounds-0.1.tar.xz
 )
 
 prepare() {
@@ -51,6 +54,9 @@ build() {
     -DCMAKE_INSTALL_LIBEXECDIR=lib \
     -DBUILD_TESTING=OFF
   cmake --build plasma-mobile_build
+
+  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -B plasma-mobile-sounds_build -S "plasma-mobile-sounds-0.1"
+  cmake --build plasma-mobile-sounds_build --config Release
 }
 
 package_plasma-mobile() {
@@ -81,4 +87,15 @@ package_qqc2-breeze-style() {
   )
 
   DESTDIR="${pkgdir}" cmake --install qqc2-breeze-style_build --config Release
+}
+
+package_plasma-mobile-sounds() {
+  depends=(
+    qt5-base
+    qt5-declarative
+    qt5-quickcontrols2
+    kirigami2
+  )
+
+  DESTDIR="$pkgdir" cmake --install plasma-mobile-sounds_build --config Release
 }
