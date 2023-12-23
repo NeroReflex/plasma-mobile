@@ -13,6 +13,11 @@ pkgname=(
   plasma-mobile
 )
 
+makedepends=(
+    git
+    extra-cmake-modules
+    qt5-tools
+)
 
 optdepends=(
   'plasma-mobile-nm: Mobile networking settings modules for WiFi, etc.'
@@ -56,7 +61,6 @@ package_plasma-mobile() {
     powerdevil
     modemmanager-qt5
     plasma-wayland-session
-    kiconthemes
     kirigami2
     qt5-feedback
     kirigami-addons5
@@ -69,5 +73,12 @@ package_plasma-mobile() {
  
 
 package_qqc2-breeze-style() {
+  depends=(
+    qt5-base
+    qt5-declarative
+    qt5-quickcontrols2
+    kirigami2
+  )
+
   DESTDIR="${pkgdir}" cmake --install qqc2-breeze-style_build --config Release
 }
